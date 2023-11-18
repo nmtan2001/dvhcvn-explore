@@ -1,4 +1,4 @@
-# administrative units of Vietnam explore
+# Administrative units of Vietnam explore
 ## Video Demo:  <https://youtu.be/Gk0MTQQ7syU>
 ## Description:
 A text-based eploration-simulated program that explore the administrative units of Vietnam. 
