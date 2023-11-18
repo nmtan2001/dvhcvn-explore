@@ -2,4 +2,3 @@ requirements.txt
 test.py
 .venv
 .vscode
-__pycache__
