@@ -1,6 +1,8 @@
 import json
 import pprint
 import sys
+import os
+from colorama import Fore, Back, Style
 import re
 
 def get_country():
@@ -45,10 +47,10 @@ def remove_diacritics(name):
     name = name.strip()
     return name
 
+
 def get_city(country):
     while True:
-        for i, level1 in enumerate(country):
-            print(i+1, level1)
+
         select = input('Select city: ')
 
         #by number
@@ -57,34 +59,46 @@ def get_city(country):
         except ValueError:
             pass
         else: 
-            for i, city in enumerate(country):
-                if i+1 == int(select):
-                    print(city)
-                    return city
-                else: 
-                    i+=1
+            if select > len(country):
+                print('Invalid city')
+                continue
+            else: 
+                for i, city in enumerate(country):
+                    if i+1 == int(select):
+                        print(city)
+                        run(city)
+                        sys.exit()
+                    else: 
+                        i+=1
+                        
+        if isinstance(select, str): 
+            #by name     
+            select = remove_diacritics(select).lower()
 
-        #by name        
-        select = remove_diacritics(select).lower()
+            select = re.sub(r"(thanh pho|tinh)",'',select,re.IGNORECASE).strip()
 
-        #exit
-        if select == 'q':
-            sys.exit()
+            for level1 in country:
+                match = re.search(r"(?:Thành phố|Tỉnh) (?:\s+)?(.*)", level1,re.IGNORECASE)
+                if remove_diacritics(match.group(1).lower()) == select.lower():
+                    print(level1)
+                    # return level1
+                    run(level1)
+                    sys.exit()
 
-        select = re.sub(r"(thanh pho|tinh)",'',select,re.IGNORECASE).strip()
+            #no match:
+            print('Invalid city')
 
-        for level1 in country:
-            match = re.search(r"(?:Thành phố|Tỉnh) (?:\s+)?(.*)", level1,re.IGNORECASE)
-            if remove_diacritics(match.group(1).lower()) == select.lower():
-                return level1
-        
-        #no match:
-        print('Invalid city')
+def list_city(country):
+    for i, level1 in enumerate(country):
+        print(i+1, level1)
+
+def stat_city(country, city):
+    level2_count = len(country[city]['level2s'])
+    level3_count = country[city]['count']
+    return level2_count, level3_count
 
 def get_district(country, city):
     while True:
-        for i, level2 in enumerate(country[city]['level2s']):
-            print(i+1, level2)            
         select = input('Select district: ')
             
         #by number
@@ -93,35 +107,41 @@ def get_district(country, city):
         except ValueError:
             pass
         else: 
+            if select > len(country[city]['level2s']):
+                print('Invalid district')
+                continue
             for i, district in enumerate(country[city]['level2s']):
                 if i+1 == int(select):
                     print(district)
-                    return district
+                    run(city, district)
+                    sys.exit()
                 else: 
                     i+=1
+        if isinstance(select, str): 
+            #by name  
+            select = remove_diacritics(select).lower()
+            #exit
+            if select == 'q':
+                sys.exit()
+            select = re.sub(r"(quan|huyen|thi xa|thanh pho)",'',select,re.IGNORECASE).strip()
 
-        #by name        
-        select = remove_diacritics(select).lower()
-        # print(select)
-        #exit
-        if select == 'q':
-            sys.exit()
-        select = re.sub(r"(quan|huyen|thi xa|thanh pho)",'',select,re.IGNORECASE).strip()
-        # print(select)
+            for level2 in country[city]['level2s']:
+                match = re.search(r"(?:Quận|Huyện|Thị xã|Thành phố) (?:\s+)?(.*)", level2,re.IGNORECASE)
+                if remove_diacritics(match.group(1).lower()) == select.lower():
+                    print(level2)
+                    run(city, level2)
+                    sys.exit()
+                    return level2
+            
+            #no match:
+            print('Invalid district')
 
-
-        for level2 in country[city]['level2s']:
-            match = re.search(r"(?:Quận|Huyện|Thị xã|Thành phố) (?:\s+)?(.*)", level2,re.IGNORECASE)
-            if remove_diacritics(match.group(1).lower()) == select.lower():
-                return level2
-        
-        #no match:
-        print('Invalid district')
+def list_district(country, city):
+    for i, level2 in enumerate(country[city]['level2s']):
+        print(i+1, level2)
 
 def get_commune(country, city, district):
-    while True:
-        for i, level2 in enumerate(country[city]['level2s'][district]['level3s']):
-            print(i+1, level2)            
+    while True:      
         select = input('Select commune: ')
             
         #by number
@@ -129,39 +149,44 @@ def get_commune(country, city, district):
             select = int(select)
         except ValueError:
             pass
-        else: 
-            for i, commune in enumerate(country[city]['level2s'][district]['level3s']):
-                if i+1 == int(select):
-                    print(commune)
-                    return commune
-                else: 
-                    i+=1
+        else:
+            if select > len(country[city]['level2s'][district]['level3s']):
+                print('Invalid commune')
+                continue
+            else:  
+                for i, commune in enumerate(country[city]['level2s'][district]['level3s']):
+                    if i+1 == int(select):
+                        print(commune)
+                        run(city, district, commune)
+                        sys.exit()
+                        return commune
+                    else: 
+                        i+=1
 
         #by name        
-        select = remove_diacritics(select).lower()
+        if isinstance(select, str): 
+            select = remove_diacritics(select).lower()
 
-        #exit
-        if select == 'q':
-            sys.exit()
-        select = re.sub(r"(xa|phuong|thi tran)",'',select,re.IGNORECASE).strip()
+            #exit
+            if select == 'q':
+                sys.exit()
+            select = re.sub(r"(xa|phuong|thi tran)",'',select,re.IGNORECASE).strip()
 
 
-        for level3 in country[city]['level2s'][district]['level3s']:
-            match = re.search(r"(?:Xã|Phường|Thị trấn) (?:\s+)?(.*)", level3,re.IGNORECASE)
-            if remove_diacritics(match.group(1).lower()) == select.lower():
-                return level3
+            for level3 in country[city]['level2s'][district]['level3s']:
+                match = re.search(r"(?:Xã|Phường|Thị trấn) (?:\s+)?(.*)", level3,re.IGNORECASE)
+                if remove_diacritics(match.group(1).lower()) == select.lower():
+                    print(commune)
+                    run(city, district, level3)
+                    sys.exit()
+                    return level3
         
-        #no match:
-        print('Invalid commune')
+            #no match:
+            print('Invalid commune')
 
-def explore(country):
-    city = get_city(country)
-    # print(city)
-    district = get_district(country, city)
-    # print(district)
-    commune = get_commune(country, city, district)
-    # print(commune)
-    return f"{city} > {district} > {commune}"
+def list_communes(country, city, district):
+    for i, level2 in enumerate(country[city]['level2s'][district]['level3s']):
+        print(i+1, level2)     
 
 def total(country):
     level1_count = len(country)
@@ -175,27 +200,87 @@ def total(country):
 
     return level1_count, level2_count, level3_count
 
-def stat_city(country, city):
-  level2_count = len(country[city]['level2s'])
-  level3_count = country[city]['count']
-  return level2_count, level3_count
+def data_explore(*args):
+    if len(args) == 1:
+        level1_count, level2_count, level3_count = total(args[0])
+        return f"Number of cities: {level1_count}\nNumber of districts: {level2_count}\nNumber of communes: {level3_count}"
 
-def data_explore(country):
-    level1_count, level2_count, level3_count = total(country)
+    if len(args) == 2:
+        country = args[0]
+        city = args[1]
+        number_of_level2s, number_of_level3s = stat_city(country, city)
+        return (f"Number of districts and communes for {city}: {number_of_level2s} districts, {number_of_level3s} communes")
+    
+    if len(args) == 3:
+        country = args[0]
+        city = args[1]
+        district = args[2]
+        level3_count = country[city]['level2s'][district]['count']
+        return (f"Number of communes for {district } of {city} : {level3_count} communes")
 
-    print(f"Number of level 1: {level1_count}")
-    print(f"Number of level 2: {level2_count}")
-    print(f"Number of level 3: {level3_count}")
-    level1_name = "Thành phố Cần Thơ"
-    number_of_level2s, number_of_level3s = stat_city(country, level1_name)
-    print(f"Number of level 2s for level 1 '{level1_name}': {number_of_level2s}, {number_of_level3s}")
+def bold(type): sys.stdout.write("\033[1m" + type + "\033[0m")
+
+def intro():
+    print('Choose what you want to do: ' + Fore.BLUE + 'e (explore) ' + Fore.GREEN + 's (statistic) '+ Fore.YELLOW + 'l (show list of administrative units) ' + Fore.RED + 'q (quit)')
+    return input(Style.RESET_ALL + 'What would you like to do? ')
+
+def run(*args):
+    country = get_country()
+    if len(args) == 0:
+        act = intro()
+        while act != 'q':
+            match act:
+                case 'e': 
+                    get_city(country)
+                case 's': 
+                    print(data_explore(country))
+                    act = intro()
+                case 'l':
+                    list_city(country)
+                    act = intro()
+                case 'q': sys.exit()
+                case _:
+                    act = intro()
+    if len(args) == 1:
+        act = intro()
+        if act == 'q': sys.exit()
+        while act != 'q':
+            match act:
+                case 'e': 
+                    get_district(country, args[0])
+                case 's': 
+                    print(data_explore(country, args[0]))
+                    act = intro()
+                case 'l':
+                    list_district(country, args[0])
+                    act = intro()
+                case 'q': sys.exit()
+                case _:
+                    act = intro()
+    if len(args) == 2:
+        act = intro()
+        if act == 'q': sys.exit()
+        while act != 'q':
+            match act:
+                case 'e': 
+                    get_commune(country, args[0], args[1])
+                case 's': 
+                    print(data_explore(country, args[0], args[1]))
+                    act = intro()
+                case 'l':
+                    list_communes(country, args[0], args[1])
+                    act = intro()
+                case 'q': sys.exit()
+                case _:
+                    act = intro()
+    if len(args) == 3:
+        bold(f"{Fore.BLUE + args[0]} > { Fore.CYAN + args[1]} > {Fore.GREEN +  args[2]}\n")
+        bold(Fore.LIGHTRED_EX + 'Thanks for playing\n')
 
 def main():
-    country = get_country()
-    # pprint.pprint(country)
-    data_explore(country)
-    # print(explore(country))
-
+    bold("Let's explore Vietnam !\n")
+    print('Data provided by: https://github.com/daohoangson/dvhcvn')
+    run()
 
 if __name__ == "__main__":
     main()
