@@ -45,6 +45,7 @@ def remove_diacritics(name):
     name = name.strip()
     return name
 
+
 def get_city(country):
     while True:
 
