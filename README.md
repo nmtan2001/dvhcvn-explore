@@ -22,7 +22,7 @@ There will be some commands that you can perform at each stages:
 - **q (Quit)**: Quit the program
 
 ## Brief explanation:
-Functions: 
+### Functions: 
 - __get_country__: Create a dictionary out of the JSON file taken from dvhcvn
 
 - __remove_diacritics__: Remove all the diacritics of a word/phrase using RegEx
@@ -37,6 +37,6 @@ Functions:
 
 - __intro/run__: Control the flow of program
 
-Libraries:
+### Libraries:
 - __pytest__:Perform unit tests on functions
 - __colorama__: give colors to prints
