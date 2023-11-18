@@ -31,9 +31,9 @@ There will be some commands that you can perform at each stages:
 
 - __list_city/list_district/list_commune__: List all the child units based on the parents
 
-- __total/data_explore/stat_city__ :Perform calcualtion to get statistics
+- __total/data_explore/stat_city__ :Perform calculations to get statistics
 
-- __bold__ : Make the required phase bold
+- __bold__ : Make the required phrase bold
 
 - __intro/run__: Control the flow of program
 
