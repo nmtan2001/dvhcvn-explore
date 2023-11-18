@@ -1,7 +1,5 @@
 import json
-import pprint
 import sys
-import os
 from colorama import Fore, Back, Style
 import re
 
@@ -46,7 +44,6 @@ def remove_diacritics(name):
     name = re.sub(r"\s+", " ", name)
     name = name.strip()
     return name
-
 
 def get_city(country):
     while True:
